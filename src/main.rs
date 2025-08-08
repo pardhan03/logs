@@ -1,6 +1,19 @@
 use std::{fs, string};
 use std::io::Error;
 
+fn extract_error(text: &str) -> Vec<String> {
+    let split_text = text.split("\n");
+
+    let mut results = vec![];
+
+    for line in split_text {
+        if line.starts_with("ERROR") {
+            results.push(line.to_string());
+        }
+    }
+    results
+}
+
 fn string_test(a: String, b: &String, c: &str) {
 
 }
@@ -9,12 +22,28 @@ fn main() {
 
     string_test(String::from("red"), &String::from("red"), "red");
 
-    let text = fs::read_to_string("logs.txt");
+    // let mut error_logs = vec![];
 
-    match text {
-        Ok(text) => println!("{:#?}",text.len()),
-        Err(e) => eprintln!("Failed to read logs.txt: {}", e),
-    }
+    let text = fs::read_to_string("logs.txt").expect("Failed to read logs.txt");
+    let error_logs =  extract_error(&text);
+    fs::write("error.txt", error_logs.join("\n")).expect("Failed to write error.txt");
+    // match text {
+    //     Ok(text) => {
+    //         let error_logs = extract_error(text.as_str());
+    //         // println!("{:#?}", error_logs);
+    //         match fs::write("error.txt", error_logs.join("\n")) {
+    //             Ok(()) => {},
+    //             Err(e) => { eprintln!("{:#?}", e)}
+    //         }
+    //     },
+    //     Err(e) => {
+    //         eprintln!("Failed to read logs.txt: {}", e)
+    //     },
+    // }
+
+    // at this point text will drop from the stack and now error_logs will not point any value
+    // this will cause dangling pointer erro
+    // println!("{:#?}", error_logs)
 
     // let ans = divide(0.5, 0.2);
     // match ans {
